@@ -4,6 +4,15 @@ Doma - A lisp-inspired programming language meant to be dead simple, like a [dir
 
 ## Getting started
 
+### REPL
+```console
+$ make
+Welcome to Doma!
+> (+ 1 1)
+2
+```
+
+### File
 ```console
 $ make build
 $ ./doma example.doma
