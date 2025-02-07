@@ -18,22 +18,10 @@ func Eval(expr parser.Expression, env *Env) Object {
 		return &Boolean{Value: expr.Value}
 	case *parser.List:
 		return &List{Args: expr.Args}
+	case *parser.BuiltinIdentifier:
+		return &Builtin{Value: expr.Value}
 	case *parser.Identifier:
 		return evalIdent(expr, env)
-	case *parser.MathProcedure:
-		return evalMath(expr, env)
-	case *parser.EqProcedure:
-		return evalEq(expr, env)
-	case *parser.DisplayProcedure:
-		return evalDisplay(expr, env)
-	case *parser.IfProcedure:
-		return evalIf(expr, env)
-	case *parser.ComparisonProcedure:
-		return evalComparison(expr, env)
-	case *parser.DefineProcedure:
-		return evalDefine(expr, env)
-	case *parser.LambdaProcedure:
-		return evalLambda(expr, env)
 	case *parser.Form:
 		return evalForm(expr, env)
 	}
@@ -41,11 +29,39 @@ func Eval(expr parser.Expression, env *Env) Object {
 }
 
 func evalForm(expr *parser.Form, env *Env) Object {
-	o := Eval(expr.First, env)
-	fn, ok := o.(*Lambda)
-	if !ok {
-		return newError("expected lambda, got %s", o.Type())
+	obj := Eval(expr.First, env)
+	switch obj := obj.(type) {
+	case *Builtin:
+		return applyBuiltin(obj, expr, env)
+	case *Lambda:
+		return applyLambda(obj, expr, env)
+	default:
+		return newError("unknown procedure: %s", expr.First.String())
 	}
+}
+
+func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
+	switch ident.Value {
+	case "+", "-", "*", "/":
+		return evalMath(ident, expr, env)
+	case "eq", "=":
+		return evalEq(expr, env)
+	case "display":
+		return evalDisplay(expr, env)
+	case "define":
+		return evalDefine(expr, env)
+	case "if":
+		return evalIf(expr, env)
+	case "lambda":
+		return evalLambda(expr, env)
+	case "<", ">", "<=", ">=":
+		return evalComparison(ident, expr, env)
+	default:
+		return newError("unknown identifier: %s", ident.Value)
+	}
+}
+
+func applyLambda(fn *Lambda, expr *parser.Form, env *Env) Object {
 	objs := make([]Object, 0)
 	for _, arg := range expr.Rest {
 		obj := Eval(arg, env)
@@ -70,10 +86,26 @@ func extendFnEnv(fn *Lambda, args []Object) *Env {
 	return env
 }
 
-func evalLambda(expr *parser.LambdaProcedure, env *Env) Object {
+func evalLambda(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) < 2 {
+		return newError("lambda expects at least 2 arguments, got %d", len(expr.Rest))
+	}
+	lst, ok := expr.Rest[0].(*parser.List)
+	if !ok {
+		return newError("lambda expects first argument to be a list, got %s", expr.First.TokenLiteral())
+	}
+	params := make([]*parser.Identifier, 0)
+	for _, arg := range lst.Args {
+		ident, ok := arg.(*parser.Identifier)
+		if !ok {
+			return newError("lambda args expect to be all parameters to be identifiers, got %s", arg.TokenLiteral())
+		}
+		params = append(params, ident)
+	}
+
 	return &Lambda{
-		Params: expr.Params,
-		Body:   expr.Body,
+		Params: params,
+		Body:   expr.Rest[1:],
 		Env:    env,
 	}
 }
@@ -85,21 +117,31 @@ func evalIdent(expr *parser.Identifier, env *Env) Object {
 	return newError("identifier not found: %s", expr.Value)
 }
 
-func evalDefine(expr *parser.DefineProcedure, env *Env) Object {
-	obj := Eval(expr.Value, env)
+func evalDefine(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 2 {
+		return newError("define expects 2 arguments, got %d", len(expr.Rest))
+	}
+	name, ok := expr.Rest[0].(*parser.Identifier)
+	if !ok {
+		return newError("define expects first argument to be identifier, got %s", expr.Rest[0].TokenLiteral())
+	}
+	obj := Eval(expr.Rest[1], env)
 	if isError(obj) {
 		return obj
 	}
-	env.Set(expr.Name, obj)
+	env.Set(name.Value, obj)
 	return obj
 }
 
-func evalComparison(expr *parser.ComparisonProcedure, env *Env) Object {
-	left := Eval(expr.Left, env)
+func evalComparison(ident *Builtin, expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 2 {
+		return newError("%s expects 2 arguments, got %d", ident.Value, len(expr.Rest))
+	}
+	left := Eval(expr.Rest[0], env)
 	if isError(left) {
 		return left
 	}
-	right := Eval(expr.Right, env)
+	right := Eval(expr.Rest[1], env)
 	if isError(right) {
 		return right
 	}
@@ -108,15 +150,15 @@ func evalComparison(expr *parser.ComparisonProcedure, env *Env) Object {
 	}
 	switch left.(type) {
 	case *Number:
-		return evalNumberCmp(expr.Operator, left.(*Number), right.(*Number))
+		return evalNumberCmp(ident, left.(*Number), right.(*Number))
 	case *String:
-		return evalStringCmp(expr.Operator, left.(*String), right.(*String))
+		return evalStringCmp(ident, left.(*String), right.(*String))
 	}
 	return newError("unsupported type %s", left.Type())
 }
 
-func evalStringCmp(op string, left *String, right *String) Object {
-	switch op {
+func evalStringCmp(op *Builtin, left *String, right *String) Object {
+	switch op.Value {
 	case "<":
 		return &Boolean{Value: left.Value < right.Value}
 	case ">":
@@ -129,8 +171,8 @@ func evalStringCmp(op string, left *String, right *String) Object {
 	return newError("unknown operator: %s", op)
 }
 
-func evalNumberCmp(op string, left *Number, right *Number) Object {
-	switch op {
+func evalNumberCmp(op *Builtin, left *Number, right *Number) Object {
+	switch op.Value {
 	case "<":
 		return &Boolean{Value: left.Value < right.Value}
 	case ">":
@@ -143,21 +185,24 @@ func evalNumberCmp(op string, left *Number, right *Number) Object {
 	return newError("unknown operator: %s", op)
 }
 
-func evalIf(expr *parser.IfProcedure, env *Env) Object {
-	cond := Eval(expr.Condition, env)
+func evalIf(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 3 {
+		return newError("if expects 3 arguments, got %d", len(expr.Rest))
+	}
+	cond := Eval(expr.Rest[0], env)
 	if isError(cond) {
 		return cond
 	}
 	if isTruthy(cond) {
-		return Eval(expr.Consequence, env)
+		return Eval(expr.Rest[1], env)
 	} else {
-		return Eval(expr.Alternative, env)
+		return Eval(expr.Rest[2], env)
 	}
 }
 
-func evalDisplay(expr *parser.DisplayProcedure, env *Env) Object {
+func evalDisplay(expr *parser.Form, env *Env) Object {
 	str := make([]string, 0)
-	for _, expr := range expr.Args {
+	for _, expr := range expr.Rest {
 		obj := Eval(expr, env)
 		if isError(obj) {
 			return obj
@@ -170,12 +215,16 @@ func evalDisplay(expr *parser.DisplayProcedure, env *Env) Object {
 	return nil
 }
 
-func evalEq(expr *parser.EqProcedure, env *Env) Object {
-	left := Eval(expr.Left, env)
+func evalEq(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 2 {
+		return newError("eq expects 2 arguments, got %d", len(expr.Rest))
+	}
+
+	left := Eval(expr.Rest[0], env)
 	if isError(left) {
 		return left
 	}
-	right := Eval(expr.Right, env)
+	right := Eval(expr.Rest[1], env)
 	if isError(right) {
 		return right
 	}
@@ -194,9 +243,9 @@ func evalEq(expr *parser.EqProcedure, env *Env) Object {
 	}
 }
 
-func evalMath(expr *parser.MathProcedure, env *Env) Object {
+func evalMath(op *Builtin, expr *parser.Form, env *Env) Object {
 	objs := make([]*Number, 0)
-	for _, expr := range expr.Args {
+	for _, expr := range expr.Rest {
 		obj := Eval(expr, env)
 		if isError(obj) {
 			return obj
@@ -214,7 +263,7 @@ func evalMath(expr *parser.MathProcedure, env *Env) Object {
 	val := objs[0].Value
 	for i := 1; i < len(objs); i++ {
 		obj := objs[i]
-		switch expr.Operator {
+		switch op.Value {
 		case "+":
 			val = val + obj.Value
 		case "-":
@@ -224,7 +273,7 @@ func evalMath(expr *parser.MathProcedure, env *Env) Object {
 		case "/":
 			val = val / obj.Value
 		default:
-			return newError("unknown operator: %s", expr.Operator)
+			return newError("unknown operator: %s", op.Value)
 		}
 	}
 	return &Number{Value: val}

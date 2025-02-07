@@ -58,15 +58,15 @@ func (i *Identifier) String() string {
 
 // ---
 
-type ProcedureIdentifier struct {
+type BuiltinIdentifier struct {
 	Token lexer.Token
 	Value string
 }
 
-func (i *ProcedureIdentifier) TokenLiteral() string {
+func (i *BuiltinIdentifier) TokenLiteral() string {
 	return i.Token.Literal
 }
-func (i *ProcedureIdentifier) String() string {
+func (i *BuiltinIdentifier) String() string {
 	return i.Value
 }
 

@@ -16,6 +16,7 @@ const (
 	BOOLEAN_OBJ = "BOOLEAN"
 	LIST_OBJ    = "LIST"
 	LAMBDA_OBJ  = "LAMBDA"
+	BUILTIN_OBJ = "BUILTIN"
 )
 
 type Object interface {
@@ -108,4 +109,13 @@ func (l *Lambda) Inspect() string {
 	out.WriteString(strings.Join(args, " "))
 	out.WriteString(")")
 	return out.String()
+}
+
+type Builtin struct {
+	Value string
+}
+
+func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
+func (b *Builtin) Inspect() string {
+	return fmt.Sprintf("<procedure:%s>", b.Value)
 }
