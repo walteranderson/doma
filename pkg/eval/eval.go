@@ -8,8 +8,6 @@ import (
 
 func Eval(expr parser.Expression, env *Env) Object {
 	switch expr := expr.(type) {
-	case *parser.Program:
-		return evalProgram(expr, env)
 	case *parser.Number:
 		return &Number{Value: expr.Value}
 	case *parser.String:
@@ -20,24 +18,32 @@ func Eval(expr parser.Expression, env *Env) Object {
 		return &List{Args: expr.Args}
 	case *parser.BuiltinIdentifier:
 		return &Builtin{Value: expr.Value}
+	case *parser.Program:
+		var last Object
+		for _, expr := range expr.Args {
+			last = Eval(expr, env)
+			if isError(last) {
+				return last
+			}
+		}
+		return last
 	case *parser.Identifier:
-		return evalIdent(expr, env)
+		if ident, ok := env.Get(expr.Value); ok {
+			return ident
+		}
+		return newError("identifier not found: %s", expr.Value)
 	case *parser.Form:
-		return evalForm(expr, env)
+		obj := Eval(expr.First, env)
+		switch obj := obj.(type) {
+		case *Builtin:
+			return applyBuiltin(obj, expr, env)
+		case *Lambda:
+			return applyLambda(obj, expr, env)
+		default:
+			return newError("unknown procedure: %s", expr.First)
+		}
 	}
 	return nil
-}
-
-func evalForm(expr *parser.Form, env *Env) Object {
-	obj := Eval(expr.First, env)
-	switch obj := obj.(type) {
-	case *Builtin:
-		return applyBuiltin(obj, expr, env)
-	case *Lambda:
-		return applyLambda(obj, expr, env)
-	default:
-		return newError("unknown procedure: %s", expr.First)
-	}
 }
 
 func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
@@ -108,13 +114,6 @@ func evalLambda(expr *parser.Form, env *Env) Object {
 		Body:   expr.Rest[1:],
 		Env:    env,
 	}
-}
-
-func evalIdent(expr *parser.Identifier, env *Env) Object {
-	if ident, ok := env.Get(expr.Value); ok {
-		return ident
-	}
-	return newError("identifier not found: %s", expr.Value)
 }
 
 func evalDefine(expr *parser.Form, env *Env) Object {
@@ -277,17 +276,6 @@ func evalMath(op *Builtin, expr *parser.Form, env *Env) Object {
 		}
 	}
 	return &Number{Value: val}
-}
-
-func evalProgram(program *parser.Program, env *Env) Object {
-	var last Object
-	for _, expr := range program.Args {
-		last = Eval(expr, env)
-		if isError(last) {
-			return last
-		}
-	}
-	return last
 }
 
 func isError(obj Object) bool {
