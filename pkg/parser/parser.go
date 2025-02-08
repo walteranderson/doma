@@ -59,6 +59,7 @@ func (p *Parser) parseExpression() Expression {
 		lexer.IF,
 		lexer.DEFINE,
 		lexer.DISPLAY,
+		lexer.STRINGREF,
 		lexer.EQ,
 		lexer.LT,
 		lexer.LTE,

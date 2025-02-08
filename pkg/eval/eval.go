@@ -56,6 +56,8 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 		return evalDisplay(expr, env)
 	case "define":
 		return evalDefine(expr, env)
+	case "string-ref":
+		return evalStringRef(expr, env)
 	case "if":
 		return evalIf(expr, env)
 	case "lambda":
@@ -65,6 +67,30 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 	default:
 		return newError("unknown identifier: %s", ident.Value)
 	}
+}
+
+func evalStringRef(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 2 {
+		return newError("string-ref expects 2 arguments, got %d", len(expr.Rest))
+	}
+	strObj := Eval(expr.Rest[0], env)
+	if isError(strObj) {
+		return strObj
+	}
+	str, ok := strObj.(*String)
+	if !ok {
+		return newError("string-ref expects first argument to be a string, got %s", expr.Rest[0].String())
+	}
+	idxObj := Eval(expr.Rest[1], env)
+	if isError(idxObj) {
+		return idxObj
+	}
+	idx, ok := idxObj.(*Number)
+	if !ok {
+		return newError("string-ref expects second argument to be a number, got %s", expr.Rest[1].String())
+	}
+	val := str.Value[idx.Value]
+	return &String{Value: string(val)}
 }
 
 func applyLambda(fn *Lambda, expr *parser.Form, env *Env) Object {

@@ -34,17 +34,20 @@ const (
 	DISPLAY = "DISPLAY"
 	LIST    = "LIST"
 	EQ      = "EQ"
+
+	STRINGREF = "STRINGREF"
 )
 
 var keywords = map[string]TokenType{
-	"true":    TRUE,
-	"false":   FALSE,
-	"lambda":  LAMBDA,
-	"if":      IF,
-	"define":  DEFINE,
-	"display": DISPLAY,
-	"list":    LIST,
-	"eq":      EQ,
+	"true":       TRUE,
+	"false":      FALSE,
+	"lambda":     LAMBDA,
+	"if":         IF,
+	"define":     DEFINE,
+	"display":    DISPLAY,
+	"list":       LIST,
+	"eq":         EQ,
+	"string-ref": STRINGREF,
 }
 
 func lookupIdent(ident string) TokenType {
