@@ -70,6 +70,7 @@ func (p *Parser) parseExpression() Expression {
 	case lexer.LPAREN:
 		return p.parseForm()
 	default:
+		p.errors = append(p.errors, fmt.Sprintf("illegal character: %s", p.cur.Literal))
 		return nil
 	}
 }

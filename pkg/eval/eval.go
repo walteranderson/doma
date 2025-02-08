@@ -36,7 +36,7 @@ func evalForm(expr *parser.Form, env *Env) Object {
 	case *Lambda:
 		return applyLambda(obj, expr, env)
 	default:
-		return newError("unknown procedure: %s", expr.First.String())
+		return newError("unknown procedure: %s", expr.First)
 	}
 }
 

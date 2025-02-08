@@ -42,6 +42,9 @@ func (l *Lexer) NextToken() Token {
 	case '"':
 		tok.Type = STRING
 		tok.Literal = l.readString()
+	case '=':
+		tok.Type = EQ
+		tok.Literal = string(l.ch)
 	case '-':
 		if isDigit(l.peekChar()) {
 			ch := l.ch
@@ -103,6 +106,7 @@ func (l *Lexer) NextToken() Token {
 			return tok
 		} else {
 			tok.Type = ILLEGAL
+			tok.Literal = string(l.ch)
 		}
 	}
 	l.readChar()
