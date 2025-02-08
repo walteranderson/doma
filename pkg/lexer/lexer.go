@@ -30,9 +30,6 @@ func (l *Lexer) NextToken() Token {
 	case '+':
 		tok.Type = PLUS
 		tok.Literal = string(l.ch)
-	case '-':
-		tok.Type = MINUS
-		tok.Literal = string(l.ch)
 	case '/':
 		tok.Type = SLASH
 		tok.Literal = string(l.ch)
@@ -45,6 +42,18 @@ func (l *Lexer) NextToken() Token {
 	case '"':
 		tok.Type = STRING
 		tok.Literal = l.readString()
+	case '-':
+		if isDigit(l.peekChar()) {
+			ch := l.ch
+			l.readChar()
+			num := l.readInt()
+			tok.Type = NUMBER
+			tok.Literal = string(ch) + string(num)
+			return tok
+		} else {
+			tok.Type = MINUS
+			tok.Literal = string(l.ch)
+		}
 	case '<':
 		if l.peekChar() == '=' {
 			tok.Type = LTE
