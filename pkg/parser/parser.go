@@ -60,6 +60,8 @@ func (p *Parser) parseExpression() Expression {
 		lexer.DEFINE,
 		lexer.DISPLAY,
 		lexer.STRINGREF,
+		lexer.FIRST,
+		lexer.REST,
 		lexer.EQ,
 		lexer.LT,
 		lexer.LTE,

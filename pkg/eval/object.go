@@ -10,13 +10,14 @@ import (
 type ObjectType string
 
 const (
-	ERROR_OBJ   = "ERROR"
-	NUMBER_OBJ  = "NUMBER"
-	STRING_OBJ  = "STRING"
-	BOOLEAN_OBJ = "BOOLEAN"
-	LIST_OBJ    = "LIST"
-	LAMBDA_OBJ  = "LAMBDA"
-	BUILTIN_OBJ = "BUILTIN"
+	ERROR_OBJ     = "ERROR"
+	NUMBER_OBJ    = "NUMBER"
+	STRING_OBJ    = "STRING"
+	BOOLEAN_OBJ   = "BOOLEAN"
+	LIST_OBJ      = "LIST"
+	LAMBDA_OBJ    = "LAMBDA"
+	BUILTIN_OBJ   = "BUILTIN"
+	PROCEDURE_OBJ = "PROCEDURE"
 )
 
 type Object interface {
@@ -97,18 +98,7 @@ type Lambda struct {
 
 func (l *Lambda) Type() ObjectType { return LAMBDA_OBJ }
 func (l *Lambda) Inspect() string {
-	var out bytes.Buffer
-	args := make([]string, 0)
-	for _, p := range l.Params {
-		args = append(args, p.String())
-	}
-	for _, b := range l.Body {
-		args = append(args, b.String())
-	}
-	out.WriteString("(lambda ")
-	out.WriteString(strings.Join(args, " "))
-	out.WriteString(")")
-	return out.String()
+	return "#<procedure>"
 }
 
 type Builtin struct {
@@ -117,5 +107,15 @@ type Builtin struct {
 
 func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }
 func (b *Builtin) Inspect() string {
-	return fmt.Sprintf("<procedure:%s>", b.Value)
+	return fmt.Sprintf("#<procedure:%s>", b.Value)
+}
+
+type Procedure struct {
+	Name  string
+	Value *Lambda
+}
+
+func (s *Procedure) Type() ObjectType { return PROCEDURE_OBJ }
+func (s *Procedure) Inspect() string {
+	return fmt.Sprintf("#<procedure:%s>", s.Name)
 }

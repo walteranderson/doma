@@ -37,6 +37,8 @@ func Eval(expr parser.Expression, env *Env) Object {
 		switch obj := obj.(type) {
 		case *Builtin:
 			return applyBuiltin(obj, expr, env)
+		case *Procedure:
+			return applyLambda(obj.Value, expr, env)
 		case *Lambda:
 			return applyLambda(obj, expr, env)
 		default:
@@ -64,9 +66,38 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 		return evalLambda(expr, env)
 	case "<", ">", "<=", ">=":
 		return evalComparison(ident, expr, env)
+	case "first":
+		return evalFirst(expr, env)
+	case "rest":
+		return evalRest(expr, env)
 	default:
 		return newError("unknown identifier: %s", ident.Value)
 	}
+}
+
+func evalFirst(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 1 {
+		return newError("first expects 1 argument, got %d", len(expr.Rest))
+	}
+	obj := Eval(expr.Rest[0], env)
+	lst, ok := obj.(*List)
+	if !ok {
+		return newError("first expects a list, received %s", obj.Type())
+	}
+	return Eval(lst.Args[0], env)
+}
+
+func evalRest(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 1 {
+		return newError("first expects 1 argument, got %d", len(expr.Rest))
+	}
+	obj := Eval(expr.Rest[0], env)
+	lst, ok := obj.(*List)
+	if !ok {
+		return newError("first expects a list, received %s", obj.Type())
+	}
+	lst.Args = lst.Args[1:]
+	return lst
 }
 
 func evalStringRef(expr *parser.Form, env *Env) Object {
@@ -154,8 +185,15 @@ func evalDefine(expr *parser.Form, env *Env) Object {
 	if isError(obj) {
 		return obj
 	}
-	env.Set(name.Value, obj)
-	return obj
+	lambda, ok := obj.(*Lambda)
+	if ok {
+		proc := &Procedure{Name: name.Value, Value: lambda}
+		env.Set(name.Value, proc)
+		return proc
+	} else {
+		env.Set(name.Value, obj)
+		return obj
+	}
 }
 
 func evalComparison(ident *Builtin, expr *parser.Form, env *Env) Object {

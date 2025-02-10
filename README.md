@@ -15,5 +15,5 @@ Welcome to Doma!
 ### File
 ```console
 $ make build
-$ ./doma example.doma
+$ ./doma examples/factorial.doma
 ```
