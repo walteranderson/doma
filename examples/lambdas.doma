@@ -1,0 +1,9 @@
+(define lambda-caller
+  (lambda '(lmda a)
+    (lmda a)))
+
+(define hello-printer
+  (lambda '(name)
+    (display "Hello," name)))
+
+(lambda-caller hello-printer "Joe")

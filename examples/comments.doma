@@ -1,0 +1,12 @@
+;(define foo
+;  (lambda '(a)
+;	(+ a a)))
+
+;(define bar
+;  (lambda '(b)
+;	(- b b)))
+
+
+
+
+;(display (foo 1) (bar 2))

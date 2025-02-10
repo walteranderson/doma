@@ -39,6 +39,7 @@ const (
 	FIRST     = "FIRST"
 	REST      = "REST"
 	STRINGREF = "STRINGREF"
+	LEN       = "LEN"
 )
 
 var keywords = map[string]TokenType{
@@ -53,6 +54,7 @@ var keywords = map[string]TokenType{
 	"first":      FIRST,
 	"rest":       REST,
 	"string-ref": STRINGREF,
+	"len":        LEN,
 }
 
 func lookupIdent(ident string) TokenType {
@@ -79,6 +81,7 @@ var builtins = []TokenType{
 	GTE,
 	FIRST,
 	REST,
+	LEN,
 }
 
 func IsBuiltinToken(token TokenType) bool {

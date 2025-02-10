@@ -79,9 +79,26 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 		return evalFirst(expr, env)
 	case lexer.REST:
 		return evalRest(expr, env)
+	case lexer.LEN:
+		return evalLen(expr, env)
 	default:
 		return newError("unknown identifier: %s", ident.Value)
 	}
+}
+
+func evalLen(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 1 {
+		return newError("len expects 1 argument, got %d", len(expr.Rest))
+	}
+	obj := Eval(expr.Rest[0], env)
+	if isError(obj) {
+		return obj
+	}
+	lst, ok := obj.(*List)
+	if !ok {
+		return newError("len expects a list, received %s", obj.Type())
+	}
+	return &Number{Value: int64(len(lst.Args))}
 }
 
 func evalFirst(expr *parser.Form, env *Env) Object {

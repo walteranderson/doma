@@ -154,10 +154,11 @@ func (l *Lexer) skipWhitespace() {
 }
 
 func (l *Lexer) skipComments() {
-	if l.ch == ';' {
+	for l.ch == ';' {
 		for l.ch != 0 && l.ch != '\n' {
 			l.readChar()
 		}
+		l.skipWhitespace()
 	}
 }
 
