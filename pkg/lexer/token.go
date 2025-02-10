@@ -36,6 +36,8 @@ const (
 	LIST    = "LIST"
 	EQ      = "EQ"
 
+	FIRST     = "FIRST"
+	REST      = "REST"
 	STRINGREF = "STRINGREF"
 )
 
@@ -48,6 +50,8 @@ var keywords = map[string]TokenType{
 	"display":    DISPLAY,
 	"list":       LIST,
 	"eq":         EQ,
+	"first":      FIRST,
+	"rest":       REST,
 	"string-ref": STRINGREF,
 }
 
