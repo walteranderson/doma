@@ -179,8 +179,8 @@ func applyLambda(fn *Lambda, expr *parser.Form, env *Env) Object {
 
 func extendFnEnv(fn *Lambda, args []Object) *Env {
 	env := NewEnclosedEnv(fn.Env)
-	for idx, param := range fn.Params {
-		env.Set(param.Value, args[idx])
+	for idx, arg := range args {
+		env.Set(fn.Params[idx].Value, arg)
 	}
 	return env
 }
