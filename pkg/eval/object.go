@@ -18,6 +18,7 @@ const (
 	LIST_OBJ    = "LIST"
 	LAMBDA_OBJ  = "LAMBDA"
 	BUILTIN_OBJ = "BUILTIN"
+	SYMBOL_OBJ  = "SYMBOL"
 )
 
 type Object interface {
@@ -69,6 +70,17 @@ func (b *Boolean) Inspect() string {
 	} else {
 		return "#f"
 	}
+}
+
+// ---
+
+type Symbol struct {
+	Value string
+}
+
+func (s *Symbol) Type() ObjectType { return SYMBOL_OBJ }
+func (s *Symbol) Inspect() string {
+	return fmt.Sprintf("'%s", s.Value)
 }
 
 // ---

@@ -19,6 +19,8 @@ func Eval(expr parser.Expression, env *Env) Object {
 		return &List{Args: expr.Args}
 	case *parser.BuiltinIdentifier:
 		return &Builtin{Value: expr.Token.Type}
+	case *parser.Symbol:
+		return &Symbol{Value: expr.Value}
 	case *parser.Program:
 		var last Object
 		for _, expr := range expr.Args {

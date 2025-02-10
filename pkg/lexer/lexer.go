@@ -37,8 +37,15 @@ func (l *Lexer) NextToken() Token {
 		tok.Type = ASTERISK
 		tok.Literal = string(l.ch)
 	case '\'':
-		tok.Type = TICK
-		tok.Literal = string(l.ch)
+		if isLetter(l.peekChar()) {
+			l.readChar()
+			tok.Type = SYMBOL
+			tok.Literal = l.readIdent()
+			return tok
+		} else {
+			tok.Type = TICK
+			tok.Literal = string(l.ch)
+		}
 	case '"':
 		tok.Type = STRING
 		tok.Literal = l.readString()

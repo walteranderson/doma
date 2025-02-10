@@ -47,28 +47,32 @@ func (p *Parser) parseExpression() Expression {
 		return p.parseNumber()
 	case lexer.STRING:
 		return p.parseString()
-	case lexer.IDENT:
-		return p.parseIdent()
-	case lexer.TRUE, lexer.FALSE:
-		return p.parseBoolean()
 	case lexer.TICK:
 		return p.parseListShorthand()
 	case lexer.LPAREN:
 		return p.parseForm()
+	case lexer.IDENT:
+		return &Identifier{
+			Token: p.cur,
+			Value: p.cur.Literal,
+		}
+	case lexer.TRUE, lexer.FALSE:
+		return &Boolean{
+			Token: p.cur, // true, false, #t, #f
+			Value: p.curTokenIs(lexer.TRUE),
+		}
+	case lexer.SYMBOL:
+		return &Symbol{Token: p.cur, Value: p.cur.Literal}
 	default:
 		if lexer.IsBuiltinToken(p.cur.Type) {
-			return p.parseBuiltinIdentifier()
+			return &BuiltinIdentifier{
+				Token: p.cur,
+				Value: p.cur.Literal,
+			}
 		} else {
 			p.errors = append(p.errors, fmt.Sprintf("illegal character: %s", p.cur.Literal))
 			return nil
 		}
-	}
-}
-
-func (p *Parser) parseBuiltinIdentifier() Expression {
-	return &BuiltinIdentifier{
-		Token: p.cur,
-		Value: p.cur.Literal,
 	}
 }
 
@@ -100,20 +104,6 @@ func (p *Parser) parseList() Expression {
 		p.nextToken()
 	}
 	return lf
-}
-
-func (p *Parser) parseBoolean() Expression {
-	return &Boolean{
-		Token: p.cur, // true, false, #t, #f
-		Value: p.curTokenIs(lexer.TRUE),
-	}
-}
-
-func (p *Parser) parseIdent() Expression {
-	return &Identifier{
-		Token: p.cur,
-		Value: p.cur.Literal,
-	}
 }
 
 func (p *Parser) parseForm() Expression {

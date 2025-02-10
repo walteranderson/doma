@@ -17,6 +17,7 @@ const (
 	IDENT   = "IDENT"
 	TRUE    = "TRUE"
 	FALSE   = "FALSE"
+	SYMBOL  = "SYMBOL"
 
 	PLUS     = "PLUS"
 	MINUS    = "MINUS"

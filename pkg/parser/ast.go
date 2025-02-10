@@ -84,6 +84,20 @@ func (b *Boolean) String() string {
 	return b.Token.Literal
 }
 
+// ---
+
+type Symbol struct {
+	Token lexer.Token
+	Value string
+}
+
+func (s *Symbol) TokenLiteral() string {
+	return s.Token.Literal
+}
+func (s *Symbol) String() string {
+	return s.Token.Literal
+}
+
 // ------------------------------
 // Lists
 // ------------------------------
