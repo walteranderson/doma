@@ -191,13 +191,13 @@ func evalComparison(ident *Builtin, expr *parser.Form, env *Env) Object {
 
 func evalStringCmp(op *Builtin, left *String, right *String) Object {
 	switch op.Value {
-	case "<":
+	case lexer.LT:
 		return &Boolean{Value: left.Value < right.Value}
-	case ">":
+	case lexer.GT:
 		return &Boolean{Value: left.Value > right.Value}
-	case "<=":
+	case lexer.LTE:
 		return &Boolean{Value: left.Value <= right.Value}
-	case ">=":
+	case lexer.GTE:
 		return &Boolean{Value: left.Value >= right.Value}
 	}
 	return newError("unknown operator: %s", op)
@@ -205,13 +205,13 @@ func evalStringCmp(op *Builtin, left *String, right *String) Object {
 
 func evalNumberCmp(op *Builtin, left *Number, right *Number) Object {
 	switch op.Value {
-	case "<":
+	case lexer.LT:
 		return &Boolean{Value: left.Value < right.Value}
-	case ">":
+	case lexer.GT:
 		return &Boolean{Value: left.Value > right.Value}
-	case "<=":
+	case lexer.LTE:
 		return &Boolean{Value: left.Value <= right.Value}
-	case ">=":
+	case lexer.GTE:
 		return &Boolean{Value: left.Value >= right.Value}
 	}
 	return newError("unknown operator: %s", op)
@@ -296,13 +296,13 @@ func evalMath(op *Builtin, expr *parser.Form, env *Env) Object {
 	for i := 1; i < len(objs); i++ {
 		obj := objs[i]
 		switch op.Value {
-		case "+":
+		case lexer.PLUS:
 			val = val + obj.Value
-		case "-":
+		case lexer.MINUS:
 			val = val - obj.Value
-		case "*":
+		case lexer.ASTERISK:
 			val = val * obj.Value
-		case "/":
+		case lexer.SLASH:
 			val = val / obj.Value
 		default:
 			return newError("unknown operator: %s", op.Value)
