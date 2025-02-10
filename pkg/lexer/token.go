@@ -77,6 +77,8 @@ var builtins = []TokenType{
 	LTE,
 	GT,
 	GTE,
+	FIRST,
+	REST,
 }
 
 func IsBuiltinToken(token TokenType) bool {

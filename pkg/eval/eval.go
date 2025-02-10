@@ -75,9 +75,9 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 		lexer.LTE,
 		lexer.GTE:
 		return evalComparison(ident, expr, env)
-	case "first":
+	case lexer.FIRST:
 		return evalFirst(expr, env)
-	case "rest":
+	case lexer.REST:
 		return evalRest(expr, env)
 	default:
 		return newError("unknown identifier: %s", ident.Value)
@@ -89,9 +89,16 @@ func evalFirst(expr *parser.Form, env *Env) Object {
 		return newError("first expects 1 argument, got %d", len(expr.Rest))
 	}
 	obj := Eval(expr.Rest[0], env)
+	if isError(obj) {
+		return obj
+	}
 	lst, ok := obj.(*List)
 	if !ok {
 		return newError("first expects a list, received %s", obj.Type())
+	}
+	ident, ok := lst.Args[0].(*parser.Identifier)
+	if ok {
+		return &Symbol{Value: ident.Value}
 	}
 	return Eval(lst.Args[0], env)
 }
@@ -101,6 +108,9 @@ func evalRest(expr *parser.Form, env *Env) Object {
 		return newError("first expects 1 argument, got %d", len(expr.Rest))
 	}
 	obj := Eval(expr.Rest[0], env)
+	if isError(obj) {
+		return obj
+	}
 	lst, ok := obj.(*List)
 	if !ok {
 		return newError("first expects a list, received %s", obj.Type())
