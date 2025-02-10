@@ -79,7 +79,7 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 		return evalFirst(expr, env)
 	case lexer.REST:
 		return evalRest(expr, env)
-	case lexer.LEN:
+	case lexer.LENGTH:
 		return evalLen(expr, env)
 	default:
 		return newError("unknown identifier: %s", ident.Value)
