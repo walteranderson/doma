@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"doma/pkg/lexer"
 	"doma/pkg/parser"
 	"fmt"
 	"strings"
@@ -17,7 +18,7 @@ func Eval(expr parser.Expression, env *Env) Object {
 	case *parser.List:
 		return &List{Args: expr.Args}
 	case *parser.BuiltinIdentifier:
-		return &Builtin{Value: expr.Value}
+		return &Builtin{Value: expr.Token.Type}
 	case *parser.Program:
 		var last Object
 		for _, expr := range expr.Args {
@@ -48,21 +49,27 @@ func Eval(expr parser.Expression, env *Env) Object {
 
 func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 	switch ident.Value {
-	case "+", "-", "*", "/":
+	case lexer.PLUS,
+		lexer.MINUS,
+		lexer.ASTERISK,
+		lexer.SLASH:
 		return evalMath(ident, expr, env)
-	case "eq", "=":
+	case lexer.EQ:
 		return evalEq(expr, env)
-	case "display":
+	case lexer.DISPLAY:
 		return evalDisplay(expr, env)
-	case "define":
+	case lexer.DEFINE:
 		return evalDefine(expr, env)
-	case "string-ref":
+	case lexer.STRINGREF:
 		return evalStringRef(expr, env)
-	case "if":
+	case lexer.IF:
 		return evalIf(expr, env)
-	case "lambda":
+	case lexer.LAMBDA:
 		return evalLambda(expr, env)
-	case "<", ">", "<=", ">=":
+	case lexer.LT,
+		lexer.GT,
+		lexer.LTE,
+		lexer.GTE:
 		return evalComparison(ident, expr, env)
 	default:
 		return newError("unknown identifier: %s", ident.Value)

@@ -56,3 +56,29 @@ func lookupIdent(ident string) TokenType {
 	}
 	return IDENT
 }
+
+var builtins = []TokenType{
+	PLUS,
+	MINUS,
+	ASTERISK,
+	SLASH,
+	LAMBDA,
+	IF,
+	DEFINE,
+	DISPLAY,
+	STRINGREF,
+	EQ,
+	LT,
+	LTE,
+	GT,
+	GTE,
+}
+
+func IsBuiltinToken(token TokenType) bool {
+	for _, t := range builtins {
+		if t == token {
+			return true
+		}
+	}
+	return false
+}

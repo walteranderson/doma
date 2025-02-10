@@ -2,6 +2,7 @@ package eval
 
 import (
 	"bytes"
+	"doma/pkg/lexer"
 	"doma/pkg/parser"
 	"fmt"
 	"strings"
@@ -112,7 +113,7 @@ func (l *Lambda) Inspect() string {
 }
 
 type Builtin struct {
-	Value string
+	Value lexer.TokenType
 }
 
 func (b *Builtin) Type() ObjectType { return BUILTIN_OBJ }

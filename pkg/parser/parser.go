@@ -51,28 +51,17 @@ func (p *Parser) parseExpression() Expression {
 		return p.parseIdent()
 	case lexer.TRUE, lexer.FALSE:
 		return p.parseBoolean()
-	case lexer.PLUS,
-		lexer.MINUS,
-		lexer.ASTERISK,
-		lexer.SLASH,
-		lexer.LAMBDA,
-		lexer.IF,
-		lexer.DEFINE,
-		lexer.DISPLAY,
-		lexer.STRINGREF,
-		lexer.EQ,
-		lexer.LT,
-		lexer.LTE,
-		lexer.GT,
-		lexer.GTE:
-		return p.parseBuiltinIdentifier()
 	case lexer.TICK:
 		return p.parseListShorthand()
 	case lexer.LPAREN:
 		return p.parseForm()
 	default:
-		p.errors = append(p.errors, fmt.Sprintf("illegal character: %s", p.cur.Literal))
-		return nil
+		if lexer.IsBuiltinToken(p.cur.Type) {
+			return p.parseBuiltinIdentifier()
+		} else {
+			p.errors = append(p.errors, fmt.Sprintf("illegal character: %s", p.cur.Literal))
+			return nil
+		}
 	}
 }
 
