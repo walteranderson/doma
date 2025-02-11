@@ -111,6 +111,9 @@ func evalFirst(expr *parser.Form, env *Env) Object {
 	if !ok {
 		return newError("first expects a list, received %s", obj.Type())
 	}
+	if len(lst.Args) == 0 {
+		return lst
+	}
 	ident, ok := lst.Args[0].(*parser.Identifier)
 	if ok {
 		return &Symbol{Value: ident.Value}

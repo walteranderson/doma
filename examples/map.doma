@@ -1,0 +1,10 @@
+(define map
+  (lambda '(lst lmda val)
+	(if (= 0 (length lst))
+	  val
+	  (map (rest lst) lmda
+		(cons (lmda (first lst)) val)))))
+  
+(map '(1 2 3)
+  (lambda '(v)
+	(+ 1 v)) '())
