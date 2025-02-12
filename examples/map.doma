@@ -1,16 +1,19 @@
-(define map
-  (lambda '(lst lmda val)
+(define reverse
+  (lambda '(lst acc)
 	(if (= 0 (length lst))
-	  val
-	  (map (rest lst) lmda (cons (lmda (first lst)) val)))))
+	  acc
+	  (reverse (rest lst) (cons (first lst) acc)))))
+	
+(define map
+  (lambda '(lst lmda acc)
+	(if (= 0 (length lst))
+	  (reverse acc '())
+	  (map (rest lst) lmda (cons (lmda (first lst)) acc)))))
   
-(map '(1 2 3) (lambda '(v) (+ 1 v)))
+(define data '(1 2 3))
+(define addone (lambda '(v) (+ 1 v)))
 
-;(define each
-;  (lambda '(lst lmda val)
-;	(if (= 0 (length lst))
-;	  (if val val '())
-;	  (each (rest lst) lmda (lmda (first lst))))))
-
-
-;(each '(1 2 3) (lambda '(v) (display "loop" v)))
+(display "Map Example: calling addone")
+(display data
+		 "to"
+		 (map data addone '()))
