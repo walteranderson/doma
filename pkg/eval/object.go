@@ -87,7 +87,7 @@ func (s *Symbol) Inspect() string {
 // ---
 
 type List struct {
-	Args []parser.Expression
+	Args []Object
 }
 
 func (l *List) Type() ObjectType { return LIST_OBJ }
@@ -95,7 +95,7 @@ func (l *List) Inspect() string {
 	var out bytes.Buffer
 	args := make([]string, 0)
 	for _, arg := range l.Args {
-		args = append(args, arg.String())
+		args = append(args, arg.Inspect())
 	}
 	out.WriteString("'(")
 	out.WriteString(strings.Join(args, " "))

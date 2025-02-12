@@ -16,7 +16,7 @@ func Eval(expr parser.Expression, env *Env) Object {
 	case *parser.Boolean:
 		return &Boolean{Value: expr.Value}
 	case *parser.List:
-		return &List{Args: expr.Args}
+		return evalList(expr, env)
 	case *parser.BuiltinIdentifier:
 		return &Builtin{Value: expr.Token.Type}
 	case *parser.Symbol:
@@ -49,6 +49,21 @@ func Eval(expr parser.Expression, env *Env) Object {
 		}
 	}
 	return nil
+}
+
+func evalList(expr *parser.List, env *Env) Object {
+	args := make([]Object, 0)
+	for _, arg := range expr.Args {
+		switch a := arg.(type) {
+		case *parser.Identifier:
+			args = append(args, &Symbol{Value: a.Value})
+		case *parser.BuiltinIdentifier:
+			args = append(args, &Symbol{Value: a.Value})
+		default:
+			args = append(args, Eval(a, env))
+		}
+	}
+	return &List{Args: args}
 }
 
 func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
@@ -114,11 +129,7 @@ func evalFirst(expr *parser.Form, env *Env) Object {
 	if len(lst.Args) == 0 {
 		return lst
 	}
-	ident, ok := lst.Args[0].(*parser.Identifier)
-	if ok {
-		return &Symbol{Value: ident.Value}
-	}
-	return Eval(lst.Args[0], env)
+	return lst.Args[0]
 }
 
 func evalRest(expr *parser.Form, env *Env) Object {
