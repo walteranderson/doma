@@ -94,9 +94,31 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 		return evalRest(expr, env)
 	case lexer.LENGTH:
 		return evalLen(expr, env)
+	case lexer.CONS:
+		return evalCons(expr, env)
 	default:
 		return newError("unknown identifier: %s", ident.Value)
 	}
+}
+
+func evalCons(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 2 {
+		return newError("cons expects 2 arguments, got %d", len(expr.Rest))
+	}
+	obj := Eval(expr.Rest[0], env)
+	if isError(obj) {
+		return obj
+	}
+	lstObj := Eval(expr.Rest[1], env)
+	if isError(lstObj) {
+		return lstObj
+	}
+	lst, ok := lstObj.(*List)
+	if !ok {
+		return newError("cons expects LIST, got %s", lstObj.Type())
+	}
+	lst.Args = append([]Object{obj}, lst.Args...)
+	return lst
 }
 
 func evalLen(expr *parser.Form, env *Env) Object {
@@ -144,8 +166,12 @@ func evalRest(expr *parser.Form, env *Env) Object {
 	if !ok {
 		return newError("first expects a list, received %s", obj.Type())
 	}
-	lst.Args = lst.Args[1:]
-	return lst
+	if len(lst.Args) == 1 {
+		return &List{Args: make([]Object, 0)}
+	}
+	return &List{
+		Args: lst.Args[1:],
+	}
 }
 
 func applyLambda(fn *Lambda, expr *parser.Form, env *Env) Object {
@@ -167,8 +193,12 @@ func applyLambda(fn *Lambda, expr *parser.Form, env *Env) Object {
 
 func extendFnEnv(fn *Lambda, args []Object) *Env {
 	env := NewEnclosedEnv(fn.Env)
-	for idx, arg := range args {
-		env.Set(fn.Params[idx].Value, arg)
+	for idx, param := range fn.Params {
+		if idx < len(args) {
+			env.Set(param.Value, args[idx])
+		} else {
+			env.Set(param.Value, &Nil{})
+		}
 	}
 	return env
 }
@@ -189,7 +219,6 @@ func evalLambda(expr *parser.Form, env *Env) Object {
 		}
 		params = append(params, ident)
 	}
-
 	return &Lambda{
 		Params: params,
 		Body:   expr.Rest[1:],
@@ -273,8 +302,8 @@ func evalNumberCmp(op *Builtin, left *Number, right *Number) Object {
 }
 
 func evalIf(expr *parser.Form, env *Env) Object {
-	if len(expr.Rest) != 3 {
-		return newError("if expects 3 arguments, got %d", len(expr.Rest))
+	if len(expr.Rest) < 2 {
+		return newError("if expects 2 arguments, got %d", len(expr.Rest))
 	}
 	cond := Eval(expr.Rest[0], env)
 	if isError(cond) {
@@ -374,7 +403,7 @@ func isError(obj Object) bool {
 }
 
 func isTruthy(obj Object) bool {
-	if obj == nil {
+	if obj == nil || obj.Type() == NIL_OBJ {
 		return false
 	}
 	if obj.Type() == BOOLEAN_OBJ {

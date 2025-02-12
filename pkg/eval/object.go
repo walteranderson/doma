@@ -20,6 +20,7 @@ const (
 	BUILTIN_OBJ   = "BUILTIN"
 	PROCEDURE_OBJ = "PROCEDURE"
 	SYMBOL_OBJ    = "SYMBOL"
+	NIL_OBJ       = "NIL"
 )
 
 type Object interface {
@@ -35,6 +36,16 @@ type Error struct {
 
 func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
+
+// ---
+
+type Nil struct {
+}
+
+func (n *Nil) Type() ObjectType { return NIL_OBJ }
+func (n *Nil) Inspect() string {
+	return "nil"
+}
 
 // ---
 

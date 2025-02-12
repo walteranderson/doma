@@ -38,6 +38,7 @@ const (
 
 	FIRST  = "FIRST"
 	REST   = "REST"
+	CONS   = "CONS"
 	LENGTH = "LENGTH"
 )
 
@@ -53,6 +54,7 @@ var keywords = map[string]TokenType{
 	"first":   FIRST,
 	"rest":    REST,
 	"length":  LENGTH,
+	"cons":    CONS,
 }
 
 func lookupIdent(ident string) TokenType {
@@ -79,6 +81,7 @@ var builtins = []TokenType{
 	FIRST,
 	REST,
 	LENGTH,
+	CONS,
 }
 
 func IsBuiltinToken(token TokenType) bool {
