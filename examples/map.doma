@@ -13,7 +13,11 @@
 (define data '(1 2 3))
 (define addone (lambda '(v) (+ 1 v)))
 
-(display "Map Example: calling addone")
+(display "Map over a list")
+(display data
+		 "=> adding 1 =>"
+		 (map data addone '()))
+(display "Reverse the data")
 (display data
 		 "to"
-		 (map data addone '()))
+		(reverse data '()))
