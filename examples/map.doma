@@ -3,13 +3,13 @@
 	(if (= 0 (length lst))
 	  acc
 	  (reverse (rest lst) (cons (first lst) acc)))))
-	
+
 (define map
   (lambda '(lst lmda acc)
 	(if (= 0 (length lst))
 	  (reverse acc '())
 	  (map (rest lst) lmda (cons (lmda (first lst)) acc)))))
-  
+
 (define data '(1 2 3))
 (define addone (lambda '(v) (+ 1 v)))
 
