@@ -96,9 +96,34 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 		return evalLen(expr, env)
 	case lexer.CONS:
 		return evalCons(expr, env)
+	case lexer.LIST_REF:
+		return evalListRef(expr, env)
 	default:
 		return newError("unknown identifier: %s", ident.Value)
 	}
+}
+
+func evalListRef(expr *parser.Form, env *Env) Object {
+	if len(expr.Rest) != 2 {
+		return newError("list-ref expects 2 arguments, got %d", len(expr.Rest))
+	}
+	lstObj := Eval(expr.Rest[0], env)
+	if isError(lstObj) {
+		return lstObj
+	}
+	lst, ok := lstObj.(*List)
+	if !ok {
+		return newError("list-ref expects LIST as first arg, got %s", lstObj.Type())
+	}
+	idxObj := Eval(expr.Rest[1], env)
+	if isError(idxObj) {
+		return idxObj
+	}
+	idx, ok := idxObj.(*Number)
+	if !ok {
+		return newError("list-ref expects NUMBER as second arg, got %s", idxObj.Type())
+	}
+	return lst.Args[idx.Value]
 }
 
 func evalCons(expr *parser.Form, env *Env) Object {

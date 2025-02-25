@@ -36,25 +36,27 @@ const (
 	LIST    = "LIST"
 	EQ      = "EQ"
 
-	FIRST  = "FIRST"
-	REST   = "REST"
-	CONS   = "CONS"
-	LENGTH = "LENGTH"
+	FIRST    = "FIRST"
+	REST     = "REST"
+	CONS     = "CONS"
+	LENGTH   = "LENGTH"
+	LIST_REF = "LIST_REF"
 )
 
 var keywords = map[string]TokenType{
-	"true":    TRUE,
-	"false":   FALSE,
-	"lambda":  LAMBDA,
-	"if":      IF,
-	"define":  DEFINE,
-	"display": DISPLAY,
-	"list":    LIST,
-	"eq":      EQ,
-	"first":   FIRST,
-	"rest":    REST,
-	"length":  LENGTH,
-	"cons":    CONS,
+	"true":     TRUE,
+	"false":    FALSE,
+	"lambda":   LAMBDA,
+	"if":       IF,
+	"define":   DEFINE,
+	"display":  DISPLAY,
+	"list":     LIST,
+	"eq":       EQ,
+	"first":    FIRST,
+	"rest":     REST,
+	"length":   LENGTH,
+	"cons":     CONS,
+	"list-ref": LIST_REF,
 }
 
 func lookupIdent(ident string) TokenType {
@@ -82,6 +84,7 @@ var builtins = []TokenType{
 	REST,
 	LENGTH,
 	CONS,
+	LIST_REF,
 }
 
 func IsBuiltinToken(token TokenType) bool {
