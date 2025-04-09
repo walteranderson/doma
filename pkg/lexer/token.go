@@ -33,6 +33,7 @@ const (
 	IF      = "IF"
 	DEFINE  = "DEFINE"
 	DISPLAY = "DISPLAY"
+	PRINTF  = "PRINTF"
 	LIST    = "LIST"
 	EQ      = "EQ"
 
@@ -50,6 +51,7 @@ var keywords = map[string]TokenType{
 	"if":       IF,
 	"define":   DEFINE,
 	"display":  DISPLAY,
+	"printf":   PRINTF,
 	"list":     LIST,
 	"eq":       EQ,
 	"first":    FIRST,
@@ -75,6 +77,7 @@ var builtins = []TokenType{
 	IF,
 	DEFINE,
 	DISPLAY,
+	PRINTF,
 	EQ,
 	LT,
 	LTE,

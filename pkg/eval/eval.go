@@ -4,6 +4,7 @@ import (
 	"doma/pkg/lexer"
 	"doma/pkg/parser"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -77,6 +78,8 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 		return evalEq(expr, env)
 	case lexer.DISPLAY:
 		return evalDisplay(expr, env)
+	case lexer.PRINTF:
+		return evalPrintf(expr, env)
 	case lexer.DEFINE:
 		return evalDefine(expr, env)
 	case lexer.IF:
@@ -352,6 +355,25 @@ func evalDisplay(expr *parser.Form, env *Env) Object {
 	}
 	if len(str) > 0 {
 		fmt.Println(strings.Join(str, " "))
+	}
+	return nil
+}
+
+func evalPrintf(expr *parser.Form, env *Env) Object {
+	str := make([]string, 0)
+	for _, expr := range expr.Rest {
+		obj := Eval(expr, env)
+		if isError(obj) {
+			return obj
+		}
+		str = append(str, obj.Inspect())
+	}
+	if len(str) > 0 {
+		s, err := strconv.Unquote("\"" + strings.Join(str, " ") + "\"")
+		if err != nil {
+			return newError("error from unquote: %v", err.Error())
+		}
+		fmt.Print(s)
 	}
 	return nil
 }
