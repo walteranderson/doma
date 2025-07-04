@@ -1,0 +1,11 @@
+(define begin-test
+  (lambda '(a)
+    (if (> a 0)
+        (begin
+          (display "A is greater than 0!")
+          (* a 2))
+        (begin
+          (display "A is NOT greater than 0!")
+          (* a -1)))))
+
+(begin-test -2)

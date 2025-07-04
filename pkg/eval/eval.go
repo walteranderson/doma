@@ -101,9 +101,19 @@ func applyBuiltin(ident *Builtin, expr *parser.Form, env *Env) Object {
 		return evalCons(expr, env)
 	case lexer.LIST_REF:
 		return evalListRef(expr, env)
+	case lexer.BEGIN:
+		return evalBegin(expr, env)
 	default:
 		return newError("unknown identifier: %s", ident.Value)
 	}
+}
+
+func evalBegin(expr *parser.Form, env *Env) Object {
+	var last Object
+	for _, b := range expr.Rest {
+		last = Eval(b, env)
+	}
+	return last
 }
 
 func evalListRef(expr *parser.Form, env *Env) Object {
