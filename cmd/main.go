@@ -72,7 +72,7 @@ func evalPrint(contents string, env *eval.Env) {
 	}
 	if len(program.Args) > 0 {
 		obj := eval.Eval(program, env)
-		if obj != nil {
+		if obj != nil && obj.Type() != eval.NIL_OBJ {
 			fmt.Println(obj.Inspect())
 		}
 	}

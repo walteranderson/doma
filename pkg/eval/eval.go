@@ -343,15 +343,20 @@ func evalIf(expr *parser.Form, env *Env) Object {
 	if len(expr.Rest) < 2 {
 		return newError("if expects 2 arguments, got %d", len(expr.Rest))
 	}
+	// if
 	cond := Eval(expr.Rest[0], env)
 	if isError(cond) {
 		return cond
 	}
+	// then
 	if isTruthy(cond) {
 		return Eval(expr.Rest[1], env)
-	} else {
+	}
+	// else
+	if len(expr.Rest) >= 3 {
 		return Eval(expr.Rest[2], env)
 	}
+	return &Nil{}
 }
 
 func evalDisplay(expr *parser.Form, env *Env) Object {

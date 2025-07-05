@@ -77,13 +77,13 @@ func (l *Lexer) NextToken() Token {
 		}
 	case '>':
 		if l.peekChar() == '=' {
-			tok.Type = GT
+			tok.Type = GTE
 			lit := string(l.ch)
 			l.readChar()
 			lit += string(l.ch)
 			tok.Literal = lit
 		} else {
-			tok.Type = GTE
+			tok.Type = GT
 			tok.Literal = string(l.ch)
 		}
 	case '#':
